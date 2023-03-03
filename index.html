@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite + React + TS</title>
+  <script src="https://3d-sdk.staging.intergiro.tech/v1/"></script>
+  <script type="text/javascript">
+    window.onload = function () {
+      const PUBLIC_KEY = "";
+      const TOKEN = "";
+
+      const intergiro = Intergiro3D(PUBLIC_KEY);
+
+      fetch('t2t/create-charge-consent', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          amount: 15
+        })
+      })
+        .then(result => {
+          return {
+            token: TOKEN,
+            redirectedUrl
+          }
+        })
+        .then(({ token, redirectUrl }) => {
+          const components = intergiro.components()
+          const theme = {
+            layout: 'standard',
+            fontImport: 'Poppins:wght@400',
+            style: {
+              gap: '0.5rem',
+              fontFamily: 'Poppins, Menlo',
+              fontWeight: '400',
+              text: {
+                background: '#F8F8F8',
+                color: '#070808',
+              },
+              border: {
+                color: '#3FB191',
+                width: '2px',
+                radius: '5px',
+              },
+            },
+          }
+          const card = components.get('card-input', theme)
+          const container = document.getElementById('card-input')
+          card.mount(container)
+
+          const button = document.getElementsByTagName('button')[0]
+          button.onclick = function (e) {
+            e.preventDefault()
+            intergiro
+              .confirmPaymentMethod(token, {
+                payment_method: {
+                  card: card,
+                }
+              })
+              .then(result => {
+                if (result.error) {
+                  console.error(result.error)
+                  // Redirection vers la page d'erreur
+                } else {
+                  console.log(result.data)
+                  // Redirect vers le deeplinkController
+
+                }
+              })
+          }
+        })
+    }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
